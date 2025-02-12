@@ -2,6 +2,7 @@ import express from "express"
 import dotenv from "dotenv"
 
 import users from "./src/routes/users.js";
+import people from "./src/routes/people.js";
 
 const app = express();
 dotenv.config()
@@ -11,6 +12,7 @@ app.use(express.json());
 
 // Rutas
 app.use("/users", users)
+app.use("/people", people)
 
 app.get("/", (req, res) => {
     res.send("Funcionando")

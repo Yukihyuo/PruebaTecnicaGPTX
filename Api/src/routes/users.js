@@ -9,17 +9,19 @@ app.get("/", (req, res) => {
   res.send("Funcionando")
 })
 
-app.post('/users/register', async (req, res) => {
+app.post('/register', async (req, res) => {
   const { username, email, password } = req.body;
 
   try {
     // Verifica si el usuario ya existe (usando la conexión a la base de datos)
-    const [existingUser] = await connection.execute(
+    const data = await connection.execute(
       'SELECT * FROM users WHERE username = ? OR email = ?',
       [username, email]
     );
 
-    if (existingUser.length > 0) {
+    console.log(data._rows.length)
+
+    if (data._rows.length > 0) {
       return res.status(400).json({ mensaje: 'Usuario o correo electrónico ya existen' });
     }
 
@@ -27,7 +29,7 @@ app.post('/users/register', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Inserta el nuevo usuario en la base de datos
-    const [result] = await connection.execute(
+    const result = await connection.execute(
       'INSERT INTO users (username, email, password) VALUES (?, ?, ?)',
       [username, email, hashedPassword]
     );
@@ -44,33 +46,30 @@ app.post('/users/register', async (req, res) => {
   }
 });
 
-app.post('/users/login', async (req, res) => {
+app.post('/login', async (req, res) => {
   const { username, password } = req.body;
 
   try {
-    // Busca el usuario en la base de datos
-    const [rows] = await connection.execute(
-      'SELECT * FROM users WHERE username = ?',
-      [username]
-    );
 
-    if (rows.length === 0) {
-      return res.status(401).json({ mensaje: 'Credenciales inválidas' });
-    }
+    connection.execute('select * from users where username = ?', ["root"], async (err, rows) => {
+      if (rows === 0) {
+        return res.status(401).json({ mensaje: 'Credenciales inválidas' });
+      }
+      const usuario = rows[0]
+      // Compara la contraseña ingresada con la contraseña hasheada
+      const passwordValida = await bcrypt.compare(password, usuario.password);
 
-    const usuario = rows[0];
+      if (!passwordValida) {
+        return res.status(401).json({ mensaje: 'Credenciales inválidas' });
+      }
 
-    // Compara la contraseña ingresada con la contraseña hasheada
-    const passwordValida = await bcrypt.compare(password, usuario.password);
+      // Genera el JWT
+      const token = jwt.sign({ userId: usuario.id }, 'xPhmuuW3NA9FpG');
 
-    if (!passwordValida) {
-      return res.status(401).json({ mensaje: 'Credenciales inválidas' });
-    }
+      res.json({ token });
+    });
 
-    // Genera el JWT
-    const token = jwt.sign({ userId: usuario.id }, 'xPhmuuW3NA9FpG');
 
-    res.json({ token });
   } catch (error) {
     console.error('Error en el inicio de sesión:', error);
     res.status(500).json({ mensaje: 'Error en el inicio de sesión' });
