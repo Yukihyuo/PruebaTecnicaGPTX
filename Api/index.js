@@ -1,5 +1,6 @@
 import express from "express"
 import dotenv from "dotenv"
+import cors from "cors"
 
 import users from "./src/routes/users.js";
 import people from "./src/routes/people.js";
@@ -9,6 +10,9 @@ dotenv.config()
 
 // Middleware
 app.use(express.json());
+app.use(cors({
+    origin:"*"
+}))
 
 // Rutas
 app.use("/users", users)

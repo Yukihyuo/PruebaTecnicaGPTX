@@ -6,8 +6,9 @@ const app = express.Router();
 // GET /personas - Obtener todas las personas
 app.get('/', async (req, res) => {
     try {
-        const data = await connection.execute('SELECT * FROM people');
-        res.json(data._rows);
+        connection.execute('SELECT * FROM people', async (err, rows) => {
+            res.json(rows);
+        });
     } catch (error) {
         console.error('Error al obtener personas:', error);
         res.status(500).json({ mensaje: 'Error al obtener personas' });
@@ -33,7 +34,7 @@ app.get('/:id', async (req, res) => {
 app.post('/', async (req, res) => {
     const { nombre, apellido_paterno, apellido_materno, direccion, telefono } = req.body;
     try {
-        const [result] = await connection.execute(
+        const result = await connection.execute(
             'INSERT INTO people (nombre, apellido_paterno, apellido_materno, direccion, telefono) VALUES (?, ?, ?, ?, ?)',
             [nombre, apellido_paterno, apellido_materno, direccion, telefono]
         );
@@ -66,8 +67,9 @@ app.put('/:id', async (req, res) => {
 // DELETE /personas/:id - Eliminar una persona
 app.delete('/:id', async (req, res) => {
     const { id } = req.params;
+    console.log(id)
     try {
-        const [result] = await connection.execute('DELETE FROM people WHERE id = ?', [id]);
+        const result = await connection.execute('DELETE FROM people WHERE id = ?', [id]);
         if (result.affectedRows === 0) {
             return res.status(404).json({ mensaje: 'Persona no encontrada' });
         }

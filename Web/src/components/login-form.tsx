@@ -2,13 +2,32 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { FormEvent, useState } from "react"
+import axios from "axios"
+import { useUserTokenStore } from "@/store/userStore"
 
 export function LoginForm({
     className,
     ...props
 }: React.ComponentPropsWithoutRef<"form">) {
+    const {setToken} = useUserTokenStore()
+    const [User, setUser] = useState({
+        username: "",
+        password: ""
+    })
+
+    const handleSubmit = (e: FormEvent) => {
+        e.preventDefault();
+        axios.post(`${import.meta.env.VITE_API_URL}users/login`, { ...User }).then(response => {
+            const res = response.data;
+            setToken(res.token)
+            // console.log()
+        })
+
+    }
+
     return (
-        <form className={cn("flex flex-col gap-6", className)} {...props}>
+        <form className={cn("flex flex-col gap-6", className)} {...props} onSubmit={(e) => { handleSubmit(e) }}>
             <div className="flex flex-col items-center gap-2 text-center">
                 <h1 className="text-2xl font-bold">Inicia Sesión</h1>
                 <p className="text-balance text-sm text-muted-foreground">
@@ -17,8 +36,10 @@ export function LoginForm({
             </div>
             <div className="grid gap-6">
                 <div className="grid gap-2">
-                    <Label htmlFor="email">Correo electrónico</Label>
-                    <Input id="email" type="email" placeholder="Correo electrónico" required />
+                    <Label htmlFor="email">Usuario</Label>
+                    <Input id="email" type="text" placeholder="Usuario" required
+                        value={User.username}
+                        onChange={({ target }) => { setUser({ ...User, username: target.value }) }} />
                 </div>
                 <div className="grid gap-2">
                     <div className="flex items-center">
@@ -30,7 +51,9 @@ export function LoginForm({
                             ¿Olvidaste tú contraseña?
                         </a>
                     </div>
-                    <Input id="password" type="password" placeholder="Contraseña" required />
+                    <Input id="password" type="password" placeholder="Contraseña" required
+                        value={User.password}
+                        onChange={({ target }) => { setUser({ ...User, password: target.value }) }} />
                 </div>
                 <Button type="submit" className="w-full">
                     Iniciar Sesión
