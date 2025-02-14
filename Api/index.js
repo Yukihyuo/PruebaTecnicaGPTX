@@ -1,17 +1,17 @@
 import express from "express"
-import dotenv from "dotenv"
 import cors from "cors"
 
 import users from "./src/routes/users.js";
 import people from "./src/routes/people.js";
 
+
+const port = process.env.PORT || 3050
 const app = express();
-dotenv.config()
 
 // Middleware
 app.use(express.json());
 app.use(cors({
-    origin:"*"
+    origin: "*"
 }))
 
 // Rutas
@@ -29,6 +29,6 @@ app.use((err, req, res, next) => {
 });
 
 
-app.listen(3050, () => {
-    console.log("first")
+app.listen(port, () => {
+    console.log(`Api running on port: ${port}`)
 })

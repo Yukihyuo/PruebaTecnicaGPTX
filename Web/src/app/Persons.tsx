@@ -39,7 +39,6 @@ import type People from '@/components/people/peopleModel'
 import { EditPeople } from '@/components/people/editPeople'
 import { Label } from '@/components/ui/label'
 import { DeletePeople } from '@/components/people/deletePeople'
-import People from '@/components/people/peopleModel'
 
 export default function People() {
   const [items, setItems] = React.useState<People[]>([]);
@@ -159,7 +158,6 @@ interface DataTableProps {
 
 export function DataTableDemo({ data }: DataTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([])
-  const [FilterInput, setFilterInput] = React.useState("")
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   )
@@ -167,13 +165,8 @@ export function DataTableDemo({ data }: DataTableProps) {
     React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
 
-  const filter: People[] = FilterInput
-    ? data.filter(element => element.nombre.toLowerCase().includes(FilterInput.toLowerCase())) as People[]
-    : data as People[];
-
-
   const table = useReactTable({
-    filter,
+    data,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -190,8 +183,6 @@ export function DataTableDemo({ data }: DataTableProps) {
       rowSelection,
     },
   })
-
-
 
   return (
     <div className="w-full">
